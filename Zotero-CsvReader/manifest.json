@@ -1,9 +1,16 @@
 {
   "manifest_version": 2,
   "name": "Zotero Table Reader",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "在 Zotero 标签页内直接预览 CSV/TSV 与 Excel(xlsx/xls)/ODS 表格附件，保留合并单元格效果，与 Cupertino 主题兼容。",
   "author": "csvreader",
+  "icons": {
+    "16": "assets/icon-16.png",
+    "32": "assets/icon-32.png",
+    "48": "assets/icon-48.png",
+    "96": "assets/icon-96.png",
+    "128": "assets/icon-128.png"
+  },
   "applications": {
     "zotero": {
       "id": "csvreader@zotero.local",

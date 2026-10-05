@@ -1,5 +1,7 @@
 # Zotero Table Reader
 
+<img src="Zotero-CsvReader/assets/icon-96.png" alt="Zotero Table Reader icon" width="96" height="96" align="left" hspace="14">
+
 在 Zotero 标签页内直接预览 **CSV / TSV** 与 **Excel（xlsx / xls）/ ODS** 表格附件，无需调用外部程序打开。
 
 Zotero 本身没有为第三方阅读器提供注册接口，本插件通过包装 `Zotero.FileHandlers.open()` 接管表格类附件的打开流程：命中表格类型时在 Zotero 主窗口内新建一个自定义标签页渲染表格，其它类型则原样交回系统处理。
@@ -24,7 +26,7 @@ Zotero 本身没有为第三方阅读器提供注册接口，本插件通过包�
 | --- | --- |
 | Zotero | 7.0 及以上（`strict_max_version` 为 `10.*.*`，已在 Zotero 10.0.5 上验证） |
 | 插件 ID | `csvreader@zotero.local` |
-| 当前版本 | 0.3.0 |
+| 当前版本 | 0.3.1 |
 
 ## 安装
 
@@ -56,9 +58,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File pack.ps1
 
 ```
 Zotero-CsvReader/
-├── manifest.json          # 插件清单（版本、兼容范围、ID）
+├── manifest.json          # 插件清单（版本、兼容范围、ID、图标）
 ├── bootstrap.js           # 生命周期入口：加载子脚本、注入样式、安装拦截层
 ├── prefs.js               # 默认偏好设置
+├── assets/
+│   ├── icon.svg           # 图标源文件（绿色表格，48px 及以上）
+│   ├── icon-small.svg     # 图标源文件（简化版，16 / 32px）
+│   └── icon-{16,32,48,96,128}.png
 ├── lib/
 │   └── xlsx.full.min.js   # SheetJS，用于 xlsx / xls / ODS
 ├── locale/
@@ -82,6 +88,7 @@ Zotero-CsvReader/
 - 子脚本在 `bootstrap.js` 的 `CSVREADER_SUBSCRIPTS` 中按顺序加载，新增模块需同时在此登记。
 - 拦截层采用「包装而非替换」的方式，其它同样包装 `Zotero.FileHandlers.open` 的插件可以与本插件自然串成调用链。
 - 表格样式全部限定在插件根容器前缀下，避免污染 Zotero 与其它插件的界面。
+- 图标以 `assets/icon.svg`（48px 及以上）与 `assets/icon-small.svg`（16 / 32px 简化版，坐标对齐 8 单位网格）为准，改完执行 `node tools/render-icons.js` 用无头 Edge 重新导出各尺寸 PNG；清单引用的尺寸写入 `assets/`，256 / 512 大图导出到 `branding/`（128px 由 256px 降采样得到，绕开 Edge 无头栅格化的丢帧问题）。
 
 ## 许可证
 

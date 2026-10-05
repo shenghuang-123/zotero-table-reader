@@ -3,6 +3,7 @@
 
 # 编辑器 / 工具内部文件
 .trae-html-share-packages/
+.qoder-credits/
 
 # 系统文件
 Thumbs.db
