@@ -1,0 +1,12 @@
+csvreader-toolbar-sheet = Sheet
+csvreader-toolbar-encoding = Encoding
+csvreader-toolbar-delimiter = Delimiter
+csvreader-toolbar-align = Alignment
+csvreader-toolbar-freeze-rows = Freeze rows
+csvreader-toolbar-freeze-cols = Freeze cols
+csvreader-toolbar-stats = { $rows } rows × { $cols } columns
+csvreader-toolbar-stats-sheet = { $sheet } · { $rows } rows × { $cols } columns
+csvreader-status-loading = Loading…
+csvreader-status-empty = This file has no tabular data to display
+csvreader-status-load-error = Could not read this file:
+csvreader-status-lib-missing = Spreadsheet engine is not loaded. Please restart Zotero and try again.

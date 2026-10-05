@@ -1,0 +1,9 @@
+# 构建产物（建议改为随 GitHub Release 发布）
+*.xpi
+
+# 编辑器 / 工具内部文件
+.trae-html-share-packages/
+
+# 系统文件
+Thumbs.db
+.DS_Store

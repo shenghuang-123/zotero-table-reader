@@ -1,0 +1,12 @@
+csvreader-toolbar-sheet = 工作表
+csvreader-toolbar-encoding = 编码
+csvreader-toolbar-delimiter = 分隔符
+csvreader-toolbar-align = 对齐
+csvreader-toolbar-freeze-rows = 冻结行
+csvreader-toolbar-freeze-cols = 冻结列
+csvreader-toolbar-stats = { $rows } 行 × { $cols } 列
+csvreader-toolbar-stats-sheet = { $sheet } · { $rows } 行 × { $cols } 列
+csvreader-status-loading = 正在读取…
+csvreader-status-empty = 该文件没有可显示的表格数据
+csvreader-status-load-error = 无法读取该文件：
+csvreader-status-lib-missing = 表格解析库未加载，请重启 Zotero 后重试。

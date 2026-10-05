@@ -1,0 +1,381 @@
+/*
+ * viewer.css —— 仅作用于 .zcr-* 作用域。
+ * 颜色优先取自 Cupertino 主题变量，变量缺失时回退到内置浅色/深色值。
+ * 行高必须与 viewer.js 的 ROW_HEIGHT（26px）保持一致。
+ */
+
+.zcr-root {
+  --zcr-bg: var(--color-background, #ffffff);
+  --zcr-panel: var(--color-sidepane, #f6f6f8);
+  --zcr-border: var(--color-border, rgba(0, 0, 0, 0.13));
+  --zcr-stripe: var(--color-stripe, rgba(0, 0, 0, 0.028));
+  --zcr-accent: var(--color-accent, #0a84ff);
+  --zcr-radius: var(--cupertino-radius-m, 8px);
+
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  /* tab-content 由 XUL deck 拉伸为定高；height:100% 兜底非 flex 父容器 */
+  height: 100%;
+  /* 宽度必须由宿主决定、不能由内容（宽表格）决定：
+     否则表格会把整条链路撑宽，横向溢出消失，横向滚动条永远不出现 */
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  color: inherit;
+  background: var(--zcr-bg);
+  font-family: var(
+    --cupertino-font,
+    -apple-system,
+    "Segoe UI",
+    "PingFang SC",
+    "Microsoft YaHei",
+    sans-serif
+  );
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@media (prefers-color-scheme: dark) {
+  .zcr-root {
+    --zcr-bg: var(--color-background, #1e1e20);
+    --zcr-panel: var(--color-sidepane, #26262a);
+    --zcr-border: var(--color-border, rgba(255, 255, 255, 0.14));
+    --zcr-stripe: var(--color-stripe, rgba(255, 255, 255, 0.03));
+  }
+}
+
+/* ---------- 工具栏 ---------- */
+
+.zcr-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--zcr-border);
+  background: var(--zcr-panel);
+}
+
+.zcr-title {
+  font-weight: 600;
+  max-width: 34%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.zcr-stats {
+  opacity: 0.65;
+  white-space: nowrap;
+}
+
+.zcr-toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.zcr-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* .zcr-field 的 display 会盖掉 [hidden] 的 UA 规则，必须显式压回 */
+.zcr-field[hidden] {
+  display: none;
+}
+
+.zcr-field-label {
+  opacity: 0.7;
+}
+
+.zcr-select {
+  font: inherit;
+  color: inherit;
+  background: var(--zcr-bg);
+  border: 1px solid var(--zcr-border);
+  border-radius: var(--zcr-radius);
+  padding: 2px 6px;
+  max-width: 190px;
+}
+
+.zcr-select:focus-visible {
+  outline: 2px solid var(--zcr-accent);
+  outline-offset: 1px;
+}
+
+/* 冻结行/列的数值输入：宽度固定，避免工具栏抖动 */
+.zcr-number {
+  font: inherit;
+  color: inherit;
+  background: var(--zcr-bg);
+  border: 1px solid var(--zcr-border);
+  border-radius: var(--zcr-radius);
+  padding: 2px 4px;
+  width: 54px;
+  text-align: center;
+}
+
+.zcr-number:focus-visible {
+  outline: 2px solid var(--zcr-accent);
+  outline-offset: 1px;
+}
+
+/* ---------- 表格 ---------- */
+
+.zcr-body {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  /* 同上：显式锁定宽度并裁剪，防止被内部的宽表格撑开 */
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.zcr-scroll {
+  /* 作为表格与选中框的定位基准：绝对定位的 .zcr-selection 会随内容一起滚动 */
+  position: relative;
+  /* flex-basis 固定为 100%（而非 auto=内容宽），这样它只会和宿主一样宽，
+     宽表格一定产生横向溢出，横向滚动条才有东西可滚动 */
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  /* 横向滚动条改由常驻的 .zcr-hbar 承担：主题（如 Cupertino）常把原生滚动条隐藏，
+     原生横向条会时隐时现。这里只保留纵向原生滚动条，横向仍可编程滚动。 */
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.zcr-scroll[hidden] {
+  display: none;
+}
+
+.zcr-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  /* 宽度由 viewer.js 按「行号列 + 各列实测宽度」之和写入：
+     表格随内容收缩到刚好容纳，不再用 width:100% 撑满容器 */
+}
+
+/* 表格位置：宽度小于滚动区时由外边距决定左/中/右；超出时外边距归零，正常横向滚动 */
+.zcr-table.zcr-align-left {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.zcr-table.zcr-align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.zcr-table.zcr-align-right {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.zcr-table th,
+.zcr-table td {
+  height: 26px;
+  max-height: 26px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--zcr-border);
+  border-right: 1px solid var(--zcr-border);
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 400;
+  /* 单元格改为拖拽框选，禁用原生文本选择以免出现蓝色高亮与红框打架 */
+  user-select: none;
+}
+
+.zcr-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  background: var(--zcr-panel);
+  font-weight: 600;
+}
+
+.zcr-rownum {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: 52px;
+  text-align: center;
+  opacity: 0.55;
+  background: var(--zcr-bg);
+  font-variant-numeric: tabular-nums;
+}
+
+.zcr-table thead .zcr-rownum {
+  z-index: 7;
+  background: var(--zcr-panel);
+}
+
+.zcr-row-alt {
+  background: var(--zcr-stripe);
+}
+
+.zcr-row-alt .zcr-rownum {
+  background: var(--zcr-bg);
+}
+
+/* ---------- 冻结列 / 冻结行 ---------- */
+
+/* 冻结列：横向滚动时钉在左侧。left 偏移由 viewer.js 按列宽累加后写入 inline style。
+   必须给出不透明底色，否则下方滚过的单元格会透出来。 */
+.zcr-table td.zcr-frozen-col {
+  position: sticky;
+  z-index: 2;
+  background-color: var(--zcr-bg);
+}
+
+/* 表头里的冻结列要压过表头与正文所有冻结格 */
+.zcr-table thead th.zcr-frozen-col {
+  z-index: 7;
+  background-color: var(--zcr-panel);
+}
+
+/* 冻结行：纵向滚动时钉在表头下方，top 偏移同样由 viewer.js 写入 */
+.zcr-table tbody td.zcr-frozen-row,
+.zcr-table tbody th.zcr-frozen-row {
+  position: sticky;
+  z-index: 3;
+  background-color: var(--zcr-bg);
+}
+
+/* 同时冻结行与列（含行号列）：层级最高，但仍低于表头 */
+.zcr-table tbody tr > .zcr-frozen-row.zcr-frozen-col,
+.zcr-table tbody tr > .zcr-frozen-row.zcr-rownum {
+  z-index: 4;
+}
+
+/* 隔行条纹：冻结格用「半透明条纹叠加在实底之上」保持条纹观感，
+   合并单元格除外（它本来就用实底遮盖条纹） */
+.zcr-table tr.zcr-row-alt > td.zcr-frozen-col:not(.zcr-merged-cell),
+.zcr-table tr.zcr-row-alt > td.zcr-frozen-row:not(.zcr-merged-cell) {
+  background-image: linear-gradient(var(--zcr-stripe), var(--zcr-stripe));
+}
+
+/* ---------- 区域选中（红色框线） ---------- */
+
+/* 选中框放在滚动内容坐标系里，随表格一起滚动；
+   outline 不参与布局，因此不会污染 scrollWidth 而误触发横向滚动条 */
+.zcr-selection {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  box-sizing: border-box;
+  background: rgba(255, 59, 48, 0.08);
+  outline: 2px solid #ff3b30;
+  outline-offset: -1px;
+}
+
+.zcr-selection[hidden] {
+  display: none;
+}
+
+/* 复制回退用的离屏输入框 */
+.zcr-clipboard {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.zcr-spacer td {
+  height: auto;
+  max-height: none;
+  padding: 0;
+  border: 0;
+}
+
+/* ---------- 合并单元格 ---------- */
+
+/* 跨行/跨列单元格用实底盖住隔行条纹，否则底色会穿透到跨行区域；
+   表头合并格由 .zcr-table thead th 的更高优先级规则保留面板底色 */
+.zcr-merged-cell {
+  background-color: var(--zcr-bg);
+  max-height: none;
+}
+
+/* ---------- 横向滚动条（常驻可见） ---------- */
+
+.zcr-hbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  height: 16px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  background: var(--zcr-panel);
+  border-top: 1px solid var(--zcr-border);
+  /* 自绘横条用中性灰，保证在任何主题（含隐藏原生滚动条的主题）下都清晰可见 */
+  --zcr-hbar-track: rgba(0, 0, 0, 0.12);
+  --zcr-hbar-thumb: rgba(0, 0, 0, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  .zcr-hbar {
+    --zcr-hbar-track: rgba(255, 255, 255, 0.14);
+    --zcr-hbar-thumb: rgba(255, 255, 255, 0.45);
+  }
+}
+
+.zcr-hbar[hidden] {
+  display: none;
+}
+
+.zcr-hbar-track {
+  position: relative;
+  flex: 1 1 auto;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--zcr-hbar-track);
+}
+
+.zcr-hbar-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  min-width: 36px;
+  border-radius: 5px;
+  background: var(--zcr-hbar-thumb);
+  cursor: pointer;
+}
+
+.zcr-hbar-thumb:hover,
+.zcr-hbar-thumb.zcr-hbar-dragging {
+  background: var(--zcr-accent);
+}
+
+/* ---------- 提示层 ---------- */
+
+.zcr-message {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.zcr-message[hidden] {
+  display: none;
+}
